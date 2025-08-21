@@ -112,7 +112,7 @@ li {
 }
 
 body.dark{
-  --light: #181a1e;
+  --light: #0f0f0f;
   --grey: #25252c;
   --dark: rgb(197, 197, 197);
   --light-line: #3e4144;
@@ -352,7 +352,7 @@ a {
 p {
   color: var(--text);
   font-weight: 500;
-  font-size: 0.8em !important;
+  font-size: 0.95em !important;
   line-height: 1.4;
 }
 .items-form {
@@ -504,6 +504,55 @@ input[type=text] {
 input[type=text]:focus {
   border: none;
 }
+
+select {
+  width: 100%;
+  padding: 0 10px;
+  height: 35px;
+  box-sizing: border-box;
+  border: none;
+  background-color: var(--light-line);
+  outline: none;
+  color: var(--text);
+  border-radius: 4px;
+}
+
+select:focus {
+  border: none;
+}
+
+input[type=url] {
+  width: 100%;
+  padding: 0 10px;
+  height: 35px;
+  box-sizing: border-box;
+  border: none;
+  background-color: var(--light-line);
+  outline: none;
+  color: var(--text);
+  border-radius: 4px;
+}
+
+input[type=url]:focus {
+  border: none;
+}
+
+input[type=number] {
+  width: 100%;
+  padding: 0 10px;
+  height: 35px;
+  box-sizing: border-box;
+  border: none;
+  background-color: var(--light-line);
+  outline: none;
+  color: var(--text);
+  border-radius: 4px;
+}
+
+input[type=number]:focus {
+  border: none;
+}
+
 input[type=password] {
   width: 100%;
   padding: 0 10px;
@@ -1066,4 +1115,58 @@ input[type=email]:focus {
 }
 .ratings > p {
   color: var(--white);
+}
+
+.tw-container {
+  height: 72px;
+}
+
+.t-loading-box {
+  width: 100%;
+  height: calc(100vh - 120px);
+  background-color: #252525;
+  animation: pulse 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+@keyframes pulse {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+.img-cont {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.widget-c {
+  width: 50%;
+  overflow: hidden;
+  flex: 1 1 0;
+}
+
+.trade-table-container {
+  padding: 40px 20px 20px;
+  color: #e0e0e0;
+  max-width: 1620px !important;
+  margin: auto;
+}
+.trade-image {
+  width: 50%;
+  user-select: none;
+  flex: 1 1 0;
+}
+
+@media (max-width: 1200px) {
+  .widget-c {
+    flex: 1 1 100%;
+    aspect-ratio: 16 / 9;
+  }
+
+  .trade-image {
+  flex: 1 1 100%;
+}
+
 }

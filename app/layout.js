@@ -1,6 +1,5 @@
-import "./main.css";
+import "../styles/main.css";
 import ScrollToTop from "../components/ScrollToTop";
-import Head from 'next/head'
 
 
 export default function RootLayout({ children }) {
@@ -8,8 +7,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="tr">
           {/* Meta etiketlerini ve viewport ayarlarını doğrudan buraya ekleyebilirsiniz */}
+          <meta name="mobile-web-app-capable" content="yes" />
           <meta name="description" content="Best PWA app in the world!" />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
           
           {/* Apple Web App */}
           <meta name="apple-mobile-web-app-title" content="My Awesome PWA App" />
