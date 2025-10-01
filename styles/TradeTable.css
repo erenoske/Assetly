@@ -39,6 +39,10 @@ h2 {
   border-bottom: 1px solid #333;
 }
 
+.trade-table tr:last-child > td {
+  border-bottom: none;
+}
+
 .trade-table tbody tr:hover {
   background-color: #2a2a2a;
 }
@@ -90,11 +94,6 @@ tr > .short::before {
   color: #ffdd99;
 }
 
-/* Rakamları net ayırmak için monospace tercih edilebilir */
-.trade-table td {
-  font-family: 'Consolas', monospace;
-}
-
 .trade-header {
   display: flex;
   justify-content: space-between;
@@ -116,4 +115,16 @@ tbody > tr {
   width: 25px;
   height: 25px;
   margin-left: 10px;
+}
+
+.l-clear {
+  margin-left: 0 !important;
+}
+
+.color-short {
+  color: red;
+}
+
+.color-long {
+  color: green;
 }
