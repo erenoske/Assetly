@@ -46,10 +46,6 @@
   margin: 0;
 }
 
-/* Firefox */
-.trade-form input[type=number] {
-  -moz-appearance: textfield;
-}
 
 .image-preview {
   margin-top: 20px;

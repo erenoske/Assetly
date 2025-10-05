@@ -54,33 +54,37 @@ const TradeTable = () => {
     }
   };
 
-  useEffect( () => {
-    if(trades.length > 0 && Object.keys(prices).length > 0) {
-      const total = trades.reduce( (sum, trade) => sum + calculatePnL(trade), 0)
-      setTotalPnl(total);
+useEffect(() => {
+  if (trades.length > 0 && Object.keys(prices).length > 0) {
+    const total = trades.reduce((sum, trade) => sum + calculatePnL(trade), 0);
+    setTotalPnl(total);
+  }
+}, [trades, prices]);
+
+useEffect(() => {
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      // Önce fiyatları çek
+      await fetchCryptoPrices();
+
+      // Sonra trades'i çek
+      await fetchTrades();
+    } catch (err) {
+      setError('Yükleme hatası');
+    } finally {
+      setLoading(false);
     }
-  }, [trades, prices])
+  };
 
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        await Promise.all([fetchTrades(), fetchCryptoPrices()]);
-      } catch (err) {
-        setError('Yükleme hatası');
-      } finally {
-        setLoading(false);
-      }
-    };
+  loadData();
 
-    loadData();
+  const interval = setInterval(() => {
+    fetchCryptoPrices();
+  }, 60 * 1000);
 
-    const interval = setInterval(() => {
-      fetchCryptoPrices();
-    }, 60 * 1000);
-
-    return () => clearInterval(interval);
-  }, []);
+  return () => clearInterval(interval);
+}, []);
 
   // PnL ve yüzde hesaplama helper fonksiyonu
   const calculatePnL = (trade) => {

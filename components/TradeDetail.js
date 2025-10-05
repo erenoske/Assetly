@@ -4,6 +4,7 @@ import "../styles/TradeTable.css";
 import TradingViewWidget from "./TradingViewWidget";
 import Link from "next/link";
 import { formatNumber } from "@/utils/format";
+import { useRouter } from "next/navigation";
 
 const TradeDetail = ({ id }) => {
   const [trades, setTrades] = useState([]);
@@ -12,6 +13,44 @@ const TradeDetail = ({ id }) => {
   const [price, setPrice] = useState(null);
   const [symbol, setSymbol] = useState(null);
   const [image, setImage] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+   const router = useRouter();
+
+  const handleCloseClick = () => {
+    setShowConfirm(true); 
+  };
+
+  const handleConfirm = () => {
+    setShowConfirm(false);
+    deleteTrade();
+  };
+
+  const handleCancel = () => {
+    setShowConfirm(false);
+  };
+
+  const deleteTrade = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/delete`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+        'Content-Type': 'application/json', 
+      },
+        body: JSON.stringify({ id })
+      });
+      const data = await res.json();
+
+      console.log(data.success);
+
+      if (data.success) {
+        router.push('/');
+      }
+    } catch (err) {
+      setError('Ağ hatası');
+      return null;
+    }
+  };
 
   const fetchTrades = async () => {
     try {
@@ -68,29 +107,37 @@ const TradeDetail = ({ id }) => {
     }
   };
 
-  useEffect(() => {
-    let isMounted = true;
+useEffect(() => {
 
-    const init = async () => {
-      setLoading(true);
+  const init = async () => {
+    setLoading(true);
+    try {
       const trade = await fetchTrades();
-      if (isMounted && trade) {
-        await fetchCryptoPrice(trade.asset === "GOLD" ? "PAXG" : trade.asset);
+
+      if (trade) {
+        const assetSymbol = trade.asset === "GOLD" ? "PAXG" : trade.asset;
+        await fetchCryptoPrice(assetSymbol);
       }
-      if (isMounted) setLoading(false);
-    };
+    } catch (err) {
+      setError("Yükleme hatası");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    init();
+  init();
 
-    const interval = setInterval(() => {
-      if (isMounted) fetchCryptoPrice(symbol);
-    }, 60 * 1000);
+  // Her 1 dakikada bir fiyatı güncelle
+  const interval = setInterval(() => {
+    if (symbol) {
+      fetchCryptoPrice(symbol);
+    }
+  }, 60 * 1000);
 
-    return () => {
-      isMounted = false;
-      clearInterval(interval);
-    };
-  }, [symbol, id]);
+  return () => {
+    clearInterval(interval);
+  };
+}, [symbol, id]);
 
   const calculatePnL = ({ entry, amount, type }) => {
     if (!price) return 0;
@@ -109,9 +156,25 @@ const TradeDetail = ({ id }) => {
 
   return (
     <div className='trade-table-container'>
-      <h1>
-        <Link href={"/"}> Back </Link> Trade Detail - ID: {id}
-      </h1>
+
+            {/* Popup */}
+      {showConfirm && (
+        <div className="popup-overlay">
+          <div className="popup-box">
+            <h3>Emin misin?</h3>
+            <p>Bu pozisyon kapatılacak.</p>
+            <div className="popup-actions">
+              <button onClick={handleConfirm} className="confirm-btn">Evet</button>
+              <button onClick={handleCancel} className="cancel-btn">İptal</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="h-box">
+            <Link href={"/"}> Back </Link>
+            <h1>Trade Detail</h1>       
+      </div>
 
       {trades.length > 0 ? (
         trades.map((trade) => (
@@ -138,7 +201,7 @@ const TradeDetail = ({ id }) => {
           </div>
         ))
       ) : (
-        <p>{loading ? "Veri yükleniyor..." : error}</p>
+          loading && <div className="t-loading-box"></div>
       )}
 
       <div className="img-cont">
@@ -149,7 +212,7 @@ const TradeDetail = ({ id }) => {
         )}
       </div>
 
-      {price !== null && <p>Current Price: {price}</p>}
+      { !loading && <div onClick={handleCloseClick} className="close-p">Close The Position</div> }
     </div>
   );
 };

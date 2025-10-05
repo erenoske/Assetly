@@ -44,7 +44,6 @@ const handleSubmit = async (e) => {
     console.log('Trade response:', result);
     console.log(form);
 
-    alert('Trade başarıyla eklendi!');
     setIsOpen(false);
     setForm(initialForm);
      if (onTradeAdded) onTradeAdded();
