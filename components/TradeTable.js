@@ -86,46 +86,32 @@ useEffect(() => {
   return () => clearInterval(interval);
 }, []);
 
-  // PnL ve yüzde hesaplama helper fonksiyonu
-  const calculatePnL = (trade) => {
-    const { entry, amount, type, asset } = trade;
-    const entryNum = Number(entry);
-    const amountNum = Number(amount);
-    if (!entryNum || !amountNum) return 0;
+const calculatePnL = (trade) => {
+  const currentPrice = trade.closedPrice > 0 ? trade.closedPrice : prices[trade.asset];
 
-    let priceNow = null;
-    switch (asset.toLowerCase()) {
-      case 'btc': priceNow = prices.BTC; break;
-      case 'eth': priceNow = prices.ETH; break;
-      case 'gold': priceNow = prices.GOLD; break;
-      default: return 0;
-    }
+  if (!currentPrice) return 0;
 
-    if (!priceNow) return 0;
+  const { entry, amount, type } = trade;
+  const diff = type.toLowerCase() === 'long'
+    ? currentPrice - entry
+    : entry - currentPrice;
 
-    const diff = type.toLowerCase() === 'long' ? priceNow - entryNum : entryNum - priceNow;
-    return (amountNum * diff) / entryNum;
-  };
+  return (amount * diff) / entry;
+};
 
-  const calculatePercent = (trade) => {
-    const { entry, type, asset } = trade;
-    const entryNum = Number(entry);
-    if (!entryNum) return null;
+const calculatePercent = (trade) => {
+  const currentPrice = trade.closedPrice > 0 ? trade.closedPrice : prices[trade.asset];
+  const { entry, type } = trade;
 
-    let priceNow = null;
-    switch (asset.toLowerCase()) {
-      case 'btc': priceNow = prices.BTC; break;
-      case 'eth': priceNow = prices.ETH; break;
-      case 'gold': priceNow = prices.GOLD; break;
-      default: return null;
-    }
+  if (!entry || !currentPrice) return null;
 
-    if (!priceNow) return null;
+  const isLong = type.toLowerCase() === 'long';
+  const result = isLong
+    ? ((currentPrice - entry) / entry) * 100
+    : ((entry - currentPrice) / entry) * 100;
 
-    const isLong = type.toLowerCase() === 'long';
-    const result = isLong ? ((priceNow - entryNum) / entryNum) * 100 : ((entryNum - priceNow) / entryNum) * 100;
-    return result.toFixed(1);
-  };
+  return result.toFixed(1);
+};
 
   const handleClick = (id) => router.push(`/trade/${id}`);
 

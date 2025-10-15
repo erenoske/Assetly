@@ -4,7 +4,6 @@ import "../styles/TradeTable.css";
 import TradingViewWidget from "./TradingViewWidget";
 import Link from "next/link";
 import { formatNumber } from "@/utils/format";
-import { useRouter } from "next/navigation";
 
 const TradeDetail = ({ id }) => {
   const [trades, setTrades] = useState([]);
@@ -14,7 +13,6 @@ const TradeDetail = ({ id }) => {
   const [symbol, setSymbol] = useState(null);
   const [image, setImage] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
-   const router = useRouter();
 
   const handleCloseClick = () => {
     setShowConfirm(true); 
@@ -37,14 +35,14 @@ const TradeDetail = ({ id }) => {
         headers: {
         'Content-Type': 'application/json', 
       },
-        body: JSON.stringify({ id })
+        body: JSON.stringify({ id, price })
       });
       const data = await res.json();
 
       console.log(data.success);
 
       if (data.success) {
-        router.push('/');
+        fetchTrades();
       }
     } catch (err) {
       setError('Ağ hatası');
@@ -139,20 +137,33 @@ useEffect(() => {
   };
 }, [symbol, id]);
 
-  const calculatePnL = ({ entry, amount, type }) => {
-    if (!price) return 0;
-    const diff = type.toLowerCase() === 'long' ? price - entry : entry - price;
-    return (amount * diff) / entry;
-  };
+const calculatePnL = (trade) => {
+  // Eğer trade kapandıysa closedPrice kullan
+  const currentPrice = trade.closedPrice > 0 ? trade.closedPrice : price;
 
-  const calculatePercent = (trade) => {
-    const { entry, type } = trade;
-    if (!entry || !price) return null;
+  if (!currentPrice) return 0;
 
-    const isLong = type.toLowerCase() === 'long';
-    const result = isLong ? ((price - entry) / entry) * 100 : ((entry - price) / entry) * 100;
-    return result.toFixed(1);
-  };
+  const { entry, amount, type } = trade;
+  const diff = type.toLowerCase() === 'long'
+    ? currentPrice - entry
+    : entry - currentPrice;
+
+  return (amount * diff) / entry;
+};
+
+const calculatePercent = (trade) => {
+  const currentPrice = trade.closedPrice > 0 ? trade.closedPrice : price;
+  const { entry, type } = trade;
+
+  if (!entry || !currentPrice) return null;
+
+  const isLong = type.toLowerCase() === 'long';
+  const result = isLong
+    ? ((currentPrice - entry) / entry) * 100
+    : ((entry - currentPrice) / entry) * 100;
+
+  return result.toFixed(1);
+};
 
   return (
     <div className='trade-table-container'>
@@ -197,6 +208,11 @@ useEffect(() => {
             <span style={{ color: calculatePnL(trade) >= 0 ? 'lightgreen' : 'red' }}>
               <strong className="bHeader">Profit: </strong>{formatNumber(calculatePnL(trade))}
             </span>
+                              {trade?.closedPrice > 0 ? (
+        <p className="closed-price">
+          <strong>Closed Price:</strong> {formatNumber(trade.closedPrice)}
+        </p>
+      ) : null}
             <span className={`status ${trade.status.toLowerCase()}`}>{trade.status}</span>
           </div>
         ))
@@ -212,7 +228,11 @@ useEffect(() => {
         )}
       </div>
 
-      { !loading && <div onClick={handleCloseClick} className="close-p">Close The Position</div> }
+     {!loading && trades[0]?.closedPrice <= 0 && (
+       <div onClick={handleCloseClick} className="close-p">
+         Close The Position
+       </div>
+     )}
     </div>
   );
 };
